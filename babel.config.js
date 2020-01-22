@@ -1,10 +1,32 @@
 const path = require('path')
-const appRoot = require('app-root-path').path
+const appRootPath = require('app-root-path').path
 const runSetup = require('./src/setup')
-const buildTapList = require('./src/buildTapList')
 const getAppConfig = require('./src/getAppConfig')
-const { get, isObj } = require('jsutils')
-const { PLATFORM, NODE_ENV } = process.env
+const { get, isObj, isStr } = require('jsutils')
+const { PLATFORM, NODE_ENV, TAP } = process.env
+
+/**
+ * Try to get the name of the current tap
+ * @param {string} name - name of the current tap
+ *
+ * @returns {string} - name of the current tap
+ */
+const getTapName = name => {
+
+  name = name || TAP
+
+  // If we already have a name, lowercase it, and return it
+  if(name && isStr(name)) return name
+
+  // Try to get the tapConfig, but don't validate it
+  const tapConfig = getAppConfig(appRootPath, false, false)
+  // Check for the name
+  const tapName = get(tapConfig, ['name'])
+
+  // If there's a name, lowercase it, and return it
+  return tapName && tapName
+}
+
 /**
  * Gets the platform data based on the PLATFORM ENV
  * If isWeb, tries to pull from conf.web; else pulls from conf.native else returns conf
@@ -24,15 +46,15 @@ const getPlatformData = (conf, isWeb) => {
 }
 /**
  * Loads a resolver file from the app config if defined, or uses the default
- * @param {Object} appConfig - default app.json config
+ * @param {Object} rootConfig - default app.json config
  * @param {string} type - Type of resolver file to load ( contentResolver || webResolver )
  *
  * @returns {function} - Loaded resolver file
  */
-const getResolverFile = (appConfig, type) => {
+const getResolverFile = (rootPath, rootConfig, type) => {
   try {
-    const resolverPath = get(appConfig, [ 'tapResolver', 'paths', type ])
-    const resolver = resolverPath && path.join(appRoot, resolverPath)
+    const resolverPath = get(rootConfig, [ 'tapResolver', 'paths', type ])
+    const resolver = resolverPath && path.join(rootPath, resolverPath)
     if (resolver) console.log(`Using custom resolver for ${type}`)
 
     return resolver
@@ -52,19 +74,21 @@ const getResolverFile = (appConfig, type) => {
  *
  * @returns {Object} - built babel config
  */
-const babelSetup = () => {
+const babelSetup = (appPath, tapName) => {
+
+  const rootPath = appPath || appRootPath
+
+  // Get the config for the App
+  const rootConfig = getAppConfig(rootPath)
 
   const isWeb = PLATFORM === 'web'
-  const appConfig = getAppConfig(appRoot)
-  const platformConfAliases = getPlatformData(get(appConfig, [ 'tapResolver', 'aliases' ]), isWeb)
-  const babelConf = getPlatformData(get(appConfig, [ 'tapResolver', 'babel' ]), isWeb)
-  const contentResolver = getResolverFile(appConfig, 'contentResolver')
-  const webResolver = getResolverFile(appConfig, 'webResolver')
+  const platformConfAliases = getPlatformData(get(rootConfig, [ 'tapResolver', 'aliases' ]), isWeb)
+  const babelConf = getPlatformData(get(rootConfig, [ 'tapResolver', 'babel' ]), isWeb)
+  const contentResolver = getResolverFile(rootPath, rootConfig, 'contentResolver')
+  const webResolver = getResolverFile(rootPath, rootConfig, 'webResolver')
 
-  // Build list of local taps from root_dir/taps AND root_dir/node_module/zr-rn-taps
-  buildTapList(appRoot, appConfig)
   // Run the setup to get tap extensions, and alias helper
-  const { buildAliases, EXTENSIONS } = runSetup(appRoot, appConfig, contentResolver)
+  const { buildAliases, EXTENSIONS } = runSetup(rootPath, rootConfig, contentResolver, getTapName(tapName))
   // Set the presets and plugins based on the platform type
   const presets = [ ...babelConf.presets ]
   const plugins = [ ...babelConf.plugins ]
@@ -72,8 +96,8 @@ const babelSetup = () => {
   // Build the module-resolver, and add the alias based on platform type
   plugins.push([
     'module-resolver', {
-      root: [ appRoot ],
-      cwd: appRoot,
+      root: [ rootPath ],
+      cwd: rootPath,
       extensions: EXTENSIONS,
       // Aliases work differently in webpack, so add the webResolver method helper for alias mapping
       resolvePath: isWeb && webResolver || undefined,
@@ -98,4 +122,4 @@ const babelSetup = () => {
 
 module.exports = NODE_ENV === 'resolver-test'
   ? {}
-  : babelSetup()
+  : babelSetup

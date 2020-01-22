@@ -26,7 +26,6 @@ module.exports = deepFreeze({
   cacheFiles: [
     './buildAliases',
     './buildAssets',
-    './buildTapList',
     './buildConstants',
     './getAppConfig',
     './contentResolver',
