@@ -13,14 +13,36 @@
         "testResolver": "src/mocks/base/should_not_exist"
       },
       "extensions": {
-        "assets": [],
-        "resolve": []
+        "assets": [
+          ".png",
+          ".jpg"
+        ],
+        "resolve": [
+          ".web.js",
+          ".native.js",
+          ".ios.js",
+          ".android.js",
+          ".js"
+        ]
       },
       "aliases": {
         "nameSpace": "Test",
-        "root": {},
-        "base": {},
-        "dynamic": {}
+        "root": {
+          "AppConfig": "src/mocks/app.json",
+          "Base": "src/mocks/base",
+          "Core": "src/mocks",
+          "Mocks": "src/mocks"
+        },
+        "base": {
+          "Daos": "daos",
+          "Native": "native",
+          "Store": "store"
+        },
+        "dynamic": {
+          "Assets": "assets",
+          "Components": "components",
+          "Screens": "containers/screens"
+        }
       },
       "babel": {
         "web": {
