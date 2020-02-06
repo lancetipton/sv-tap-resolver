@@ -49,6 +49,7 @@
       "jsx",
       "es6"
     ],
+    "verbose": true,
     "globals": {
       "__DEV__": true
     },

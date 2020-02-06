@@ -198,7 +198,7 @@ module.exports = options => {
   const TAP_NAME = getActiveTapName(config)
 
   // Flag set if the active tap is different from the default keg
-  const HAS_TAP = Boolean(TAP_NAME !== config.kegName)
+  const HAS_TAP = Boolean(TAP_NAME !== get(config, ['keg', 'name']))
 
   // Set the tap path if an active tap is set
   const TAP_PATH = HAS_TAP ? tapPath : BASE_PATH

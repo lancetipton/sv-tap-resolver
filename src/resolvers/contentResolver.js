@@ -55,7 +55,9 @@ module.exports = (appConfig, aliasMap, content, type) => {
 
   if(!TAP_PATH_CACHE[type]){
     // Check if a tapSrc exists
-    const typePath = path.join(aliasMap[ `${nameSpace}TapSrc` ], type)
+    const tapSrc = aliasMap[ `${nameSpace}TapSrc` ]
+    const typePath = tapSrc && path.join(tapSrc, type)
+
     // If it does, ensure its a directory
     // Otherwise use the default Tap path
     TAP_PATH_CACHE[type] = typePath && isDirectory(typePath, true)

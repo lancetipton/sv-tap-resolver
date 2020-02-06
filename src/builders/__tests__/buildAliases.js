@@ -1,8 +1,8 @@
-const { appConfig } = require('../../mocks')
+const { config } = require('../../mocks')
 
 // Helpers to allow calling the setup function in a test env
 const aliasMap = {
-  ...appConfig.keg.tapResolver.aliases,
+  ...config.keg.tapResolver.aliases,
   TestTap: '/preceding/tap/path'
 }
 
@@ -34,13 +34,13 @@ describe('Build Aliases', () => {
     content = buildContentObj()
   })
   
-  describe('param - appConfig', () => {
+  describe('param - config', () => {
 
-    it('should throw an error if first param (appConfig) is not an object', () => {
+    it('should throw an error if first param (config) is not an object', () => {
       expect(() => buildAliases(null, () => "", aliasMap, content)).toThrow(Error)
     })
     
-    it('should NOT throw an error if first param (appConfig) is an object', () => {
+    it('should NOT throw an error if first param (config) is an object', () => {
       expect(() => buildAliases({}, () => "", aliasMap, content)).not.toThrow(Error)
     })
 
@@ -58,7 +58,7 @@ describe('Build Aliases', () => {
 
     it('should use the base path for every dynamic alias if the tap is undefined', () => {
       content.tap = null
-      const finalAliasMap = buildAliases(appConfig, null, aliasMap, content)()
+      const finalAliasMap = buildAliases(config, null, aliasMap, content)()
 
       Array.from([baseKey, dynamicKey])
         .forEach(key => {
@@ -70,7 +70,7 @@ describe('Build Aliases', () => {
       content.tap =  false
       const resolvedDir = "/used/the/resolver"
       const testResolver = jest.fn((a, b, c, somePath) => (resolvedDir + somePath)) 
-      buildAliases(appConfig, testResolver, aliasMap, content)()
+      buildAliases(config, testResolver, aliasMap, content)()
 
       expect(testResolver).not.toHaveBeenCalled()
     })
@@ -78,7 +78,7 @@ describe('Build Aliases', () => {
     it('should NOT throw if passed in resolver if its not a function', () => {
       content.tap =  true
 
-      expect(buildAliases(appConfig, null, aliasMap, content)).not.toThrow(Error)
+      expect(buildAliases(config, null, aliasMap, content)).not.toThrow(Error)
     })
 
     it('should NOT call the passed in resolver if no dynamic aliases exist', () => {
@@ -86,7 +86,7 @@ describe('Build Aliases', () => {
       const resolvedDir = "/used/the/resolver"
       const testResolver = jest.fn((a, b, c, somePath) => (resolvedDir + somePath))
       const noDynamic = { ...content, dynamic: {} }
-      buildAliases(appConfig, testResolver, aliasMap, content)()
+      buildAliases(config, testResolver, aliasMap, content)()
 
       expect(testResolver).not.toHaveBeenCalled()
     })
@@ -95,7 +95,7 @@ describe('Build Aliases', () => {
       content.tap =  true
       const resolvedDir = "/used/the/resolver"
       const testResolver = jest.fn((a, b, c, somePath) => (resolvedDir + somePath)) 
-      buildAliases(appConfig, testResolver, aliasMap, content)()
+      buildAliases(config, testResolver, aliasMap, content)()
 
       expect(testResolver).toHaveBeenCalled()
     })
@@ -104,7 +104,7 @@ describe('Build Aliases', () => {
       content.tap =  true
       const resolvedDir = "/used/the/resolver"
       const testResolver = (a, b, c, somePath) => (resolvedDir + somePath)
-      const finalAliasMap = buildAliases(appConfig, testResolver, aliasMap, content)()
+      const finalAliasMap = buildAliases(config, testResolver, aliasMap, content)()
 
       expect(finalAliasMap[dynamicKey]).toContain(resolvedDir)
     })

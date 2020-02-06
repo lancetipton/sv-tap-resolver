@@ -1,9 +1,9 @@
-const appJson = require('./app.json')
+const { appConfig } = require('../../mocks')
 const path = require('path')
 
 // Helpers to allow calling the setup function in a test env
 const aliasMap = { 
-  ...appJson.keg.tapResolver.aliases,
+  ...appConfig.keg.tapResolver.aliases,
   ['TestTap']: '/preceding/tap/path'
 }
 const contentType = "components/assets"
@@ -40,7 +40,7 @@ describe('resolve content path', () => {
 
   describe('the returned resolver function', () => {
     it('should return the full path to the resolved file', () => {
-      const resolverFn = getContentResolver(appJson, aliasMap, content, contentType)
+      const resolverFn = getContentResolver(appConfig, aliasMap, content, contentType)
       const mockMatchResults = ["my/cool/path/rocks.js", "/cool/path/rocks.js"]
       const expectedPath = path.join(aliasMap['TestTap'], contentType, mockMatchResults[1])
       const fullPath = resolverFn(mockMatchResults)
@@ -50,7 +50,7 @@ describe('resolve content path', () => {
     it('should resolve a path to an index.js file if the match result points to a folder', () => {
       const dirPath = "/cool/directory" // mock of lstatSync().isDirectory returns true when directory is in the string
       const mockMatchResults = [null, dirPath]
-      const resolverFn = getContentResolver(appJson, aliasMap, content, contentType)
+      const resolverFn = getContentResolver(appConfig, aliasMap, content, contentType)
       const expectedPath = path.join(aliasMap['TestTap'], contentType, mockMatchResults[1], "index")
       const fullPath = resolverFn(mockMatchResults)
 
@@ -60,7 +60,7 @@ describe('resolve content path', () => {
     it('should resolve a path that begins with the default basePath if the tap file did not exist', () => {
       const thePath = "/cool/use/base/path" // mock of existsSync returns false when use/base/path is in the string
       const mockMatchResults = [null, thePath]
-      const resolverFn = getContentResolver(appJson, aliasMap, content, contentType)
+      const resolverFn = getContentResolver(appConfig, aliasMap, content, contentType)
       const expectedPath = path.join(content.basePath, contentType, mockMatchResults[1])
       const fullPath = resolverFn(mockMatchResults)
 

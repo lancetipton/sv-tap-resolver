@@ -21,20 +21,6 @@ module.exports = deepFreeze({
     'TAP_RESOLVER_FILE',
   ]),
   /**
-  * Files that should have their cache cleared when cacheInvalidator is called
-  */
-  cacheFiles: [
-    './builders/buildAliases',
-    './builders/buildAssets',
-    './builders/buildConstants',
-    './resolvers/getAppConfig',
-    './resolvers/contentResolver',
-    './resolvers/webResolver',
-    './runSetup',
-    './setupTap',
-  ],
-  
-  /**
   * Default assets path, relative to the base path of the app config
   */
   assetsPath: 'assets',

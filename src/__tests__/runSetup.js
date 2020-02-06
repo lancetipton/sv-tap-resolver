@@ -3,7 +3,7 @@ const { isArr, isFunc } = require('jsutils')
 
 // Helpers to allow calling the setup function in a test env
 const buildAliases = jest.fn(() => { return jest.fn() })
-const buildConstants = jest.fn(() => { return { EXTENSIONS: [] } })
+const buildConstants = jest.fn(() => { return { EXTENSIONS: { assets: [], resolve: [] } } })
 const validateApp = jest.fn(() => { return true })
 const resolver = () => ""
 const defResolver = () => ""
@@ -69,7 +69,8 @@ describe('runSetup', () => {
 
     const { EXTENSIONS, buildAliases } = runSetup(options, resolver)
 
-    expect(isArr(EXTENSIONS)).toBe(true)
+    expect(isArr(EXTENSIONS.assets)).toBe(true)
+    expect(isArr(EXTENSIONS.resolve)).toBe(true)
     expect(isFunc(buildAliases)).toBe(true)
 
   })

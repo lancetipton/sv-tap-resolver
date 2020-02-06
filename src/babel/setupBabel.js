@@ -1,5 +1,4 @@
-const path = require('path')
-const { get, isObj, isStr, deepMerge } = require('jsutils')
+const { get, isObj } = require('jsutils')
 const { checkTapKegPath } = require('../helpers')
 
 /**
@@ -40,7 +39,7 @@ const getResolverFile = (options, type) => {
 
     // Get the defined resolver path
     const resolverPath = get(options, [ 'config', 'keg', 'tapResolver', 'paths', type ])
-    
+
     // Ensure the path exists
     const resolver = resolverPath && checkTapKegPath(
       options.tapPath,

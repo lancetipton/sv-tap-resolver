@@ -1,5 +1,5 @@
 const path = require('path')
-const { FS, basePath, tapPath } = require('../../mocks')
+const { config, FS, basePath, tapPath } = require('../../mocks')
 
 // Helpers to allow calling the setup function in a test env
 let isDirectory = false
@@ -20,9 +20,9 @@ describe('Build Assets', () => {
     }
   })
 
-  it('Should write to the assets path set in the appConfig if it is a directory', () => {
+  it('Should write to the assets path set in the config if it is a directory', () => {
     isDirectory = true
-    const assetsPath = buildAssets(appConfig, basePath, tapPath)
+    const assetsPath = buildAssets(config, basePath, tapPath)
     const savePath = FS.writeFileSync.mock.calls[0][0]
 
     expect(FS.readdirSync).toHaveBeenCalledWith(`${tapPath}/assets`)
@@ -30,9 +30,9 @@ describe('Build Assets', () => {
     expect(savePath).toBe(path.join(tapPath, './assets/index.js'))
   })
 
-  it('Should write the base assets path when appConfig assets path is NOT a directory', () => {
+  it('Should write the base assets path when config assets path is NOT a directory', () => {
     isDirectory = false
-    const assetsPath = buildAssets(appConfig, basePath, tapPath)
+    const assetsPath = buildAssets(config, basePath, tapPath)
     const savePath = FS.writeFileSync.mock.calls[0][0]
 
     expect(FS.readdirSync).toHaveBeenCalledWith(`${basePath}/assets`)
@@ -40,14 +40,14 @@ describe('Build Assets', () => {
     expect(savePath).toBe(path.join(basePath, './assets/index.js'))
   })
 
-  it('Should use the base assets path when no tap assets path is set in appConfig', () => {
+  it('Should use the base assets path when no tap assets path is set in config', () => {
     isDirectory = false
     const confCopy = {
-      ...appConfig,
+      ...config,
       keg: {
         tapResolver: {
-          ...appConfig.keg.tapResolver,
-          paths: { ...appConfig.keg.tapResolver.paths, tapAssets: undefined }
+          ...config.keg.tapResolver,
+          paths: { ...config.keg.tapResolver.paths, tapAssets: undefined }
         }
       }
     }
@@ -59,7 +59,7 @@ describe('Build Assets', () => {
 
   it('Should only include allowed extensions', () => {
 
-    const assetsPath = buildAssets(appConfig, basePath, tapPath)
+    const assetsPath = buildAssets(config, basePath, tapPath)
     const saveContent = FS.writeFileSync.mock.calls[0][1]
 
     expect(saveContent.indexOf('duper.jpg')).not.toEqual(-1)
@@ -69,7 +69,7 @@ describe('Build Assets', () => {
   })
 
   it('Should return the relative path to the assets directory', () => {
-    const assetsPath = buildAssets(appConfig, basePath, tapPath)
+    const assetsPath = buildAssets(config, basePath, tapPath)
 
     expect(assetsPath).toEqual('assets')
   })
