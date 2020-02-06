@@ -112,11 +112,12 @@ const buildDynamicContent = (appConfig={}) => {
  * Builds the constants which contains paths to the taps folder
  * @param {string} appRoot - Path to the root of the project
  * @param {Object} appConfig - app.json config file
- * @param {string} tapName - Name of the tap to build for
+ * @param {string} tapPath - path to the tap to use
+ * @param {string} tapConfig - the tap.json for the current tap
  *
  * @return {Object} - Alias map to load files
  */
-module.exports = (appRoot, appConfig, tapName) => {
+module.exports = (appRoot, appConfig, tapPath, tapConfig) => {
   
   // Ensure the required app data exists
   validateApp(appRoot, appConfig)
@@ -129,7 +130,7 @@ module.exports = (appRoot, appConfig, tapName) => {
     TAP_NAME,
     TAP_PATH,
     HAS_TAP,
-  } = setupTap(appRoot, appConfig, tapName)
+  } = setupTap(appRoot, appConfig, tapPath, tapConfig)
 
   // Build the assets for the tap
   const ASSETS_PATH = buildAssets(APP_CONFIG, BASE_PATH, TAP_PATH)

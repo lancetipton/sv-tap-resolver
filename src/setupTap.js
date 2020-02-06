@@ -8,78 +8,46 @@ const tapConstants = require('./tapConstants')
 const { configKeys }  = tapConstants
 
 // Default location to store files
-const TEMP_DEF_FOLDER = path.join(__dirname, '..', './temp')
+const TEMP_DEF_FOLDER = path.join(__dirname, '..', './.temp')
 ensureDirSync(TEMP_DEF_FOLDER)
 
 /**
  * Gets the path to the app.json tap folder
- * @param {string} appRoot - Root directory of the mobile keg
- * @param {Object} appConfig - mobile keg app.json config
+ * @param {string} kegRoot - Root directory of the mobile keg
+ * @param {Object} kegConfig - mobile keg app.json config
+ * @param {string} tapPath - Root directory of the current Tap
+ * @param {Object} tapConfig - taps tap.json config
  *
  * @returns {string} - path to the base tap
  */
-const getBaseTapPath = (appRoot, appConfig) => {
+const getBaseTapPath = (kegRoot, kegConfig, tapPath, tapConfig) => {
 
   // Get the base tap path
-  const { baseTap } = get(appConfig, [ 'tapResolver', 'paths' ], {})
+  const pathsLoc = [ 'tapResolver', 'paths', 'baseTap' ]
   
-  // Helper method to check for a directory
-  const checkBaseTap = check => isDirectory(check, true) && check
-  
-  // Check for the base tap from the app config
-  return checkBaseTap(path.join(appRoot, baseTap)) ||
-    // Check for a taps folder with the app config name
-    checkBaseTap(path.join(appRoot, '/taps', appConfig.name)) ||
-    // Check for a folder with the app config name
-    checkBaseTap(path.join(appRoot, appConfig.name)) ||
-    // If none of the above, just return the root
-    appRoot
+  const tapBaseLoc = get(tapConfig, pathsLoc)
+  const kegBaseLoc = get(kegConfig, pathsLoc)
+
+  const tapBasePath = tapBaseLoc && path.join(tapPath, tapBaseLoc)
+  const kegBasePath = !tapBasePath && path.join(kegRoot, kegBaseLoc)
+
+  // Check for the base folder from the keg app config
+  return tapBasePath && isDirectory(tapBasePath, true)
+    ? tapBasePath
+    : isDirectory(kegBasePath, true) && kegBasePath
 
 }
 
 /**
  * Get the name of the active tap from the passed in param, ENV, app.json config
+ * @param {Object} kegConfig - mobile keg app.json config
  * @param {string} tapName - name of the active tap
- * @param {Object} appConfig - mobile keg app.json config
  *
  * @returns {string} - name of the active tap
  */
-const getActiveTapName = (appConfig, tapName) => {
+const getActiveTapName = (kegConfig, tapName) => {
   const { TAP } = process.env
-  return tapName || TAP || appConfig.name
-}
-
-/**
- * Gets the location of the active taps directory
- * <br> First checks root_dir/node_modules/zr-rn-taps/TAP_NAME
- * <br> Next checks root_dir/taps/TAP_NAME
- * @param {string} appRoot - Root directory of the mobile keg
- * @param {Object} appConfig - Root app.json config
- * @param {string} TAP_NAME - Name of the active tap
- *
- * @returns {string} - Path to the active tap folder, or null if no path exists on disk. 
- */
-const getTapPath = (appRoot, appConfig, tapName) => {
-  const { externalTaps, localTaps } = get(appConfig, [ 'tapResolver', 'paths' ], {})
-
-  // Get External taps root path
-  const externalTap = path.join(appRoot, externalTaps, tapName)
-
-  // Get Local tap path
-  const localTap = path.join(appRoot, localTaps, tapName)
-
-  // returns local tap if it exists
-  const tapPath = fs.existsSync(localTap)
-    ? localTap
-    // Else check for external tap
-    : fs.existsSync(externalTap)
-      ? externalTap
-      : null
-  
-  if(tapPath) return tapPath
-
-  throw new Error(`Tap path could not be found! Please ensure the config with 'tapResolver.paths' contains a 'localTaps' and 'externalTaps' key, and that their value is a valid path to your tap folder!\n\n`)
-  
+  return tapName || TAP || kegConfig.name
 }
 
 /**
@@ -102,17 +70,22 @@ const cleanupOldTempConfig = TEMP_FOLDER_PATH => {
 
 /**
  * Finds the path where temp config files should be stored
- * If the temp path is defined in appConfig
+ * If the temp path is defined in kegConfig
  * It's resolved relative to the specific clients folder
- * @param {Object} appConfig - default app.json config
+ * @param {Object} kegConfig - default app.json config
  * @param {*} TAP_PATH - path to the clients folder
  *
  * @returns {string} - path to the temp folder
  */
-const getTempFolderPath = (appConfig, TAP_PATH) => {
+const getTempFolderPath = (kegConfig, tapConfig, TAP_PATH) => {
   // Check the app config for a temp folder path
-  const configTemp = get(appConfig, [ 'tapResolver', 'paths', 'temp' ])
-  
+  const tempLocation = [ 'tapResolver', 'paths', 'temp' ]
+  const configTemp = get(
+    tapConfig,
+    tempLocation,
+    get(kegConfig, tempLocation)
+  )
+
   // If the path exists join it with the client path and return it
   // Otherwise return the default
   return configTemp
@@ -123,19 +96,19 @@ const getTempFolderPath = (appConfig, TAP_PATH) => {
 /**
  * Joins the app config root with the taps config
  * <br> Writes the joined config to disk inside a temp folder
- * @param {Object} appConfig - default app.json config
+ * @param {Object} kegConfig - default app.json config
  * @param {string} TAP_PATH - Path to the taps folder
  * @param {string} TEMP_FOLDER_PATH - Path to the temp folder
  *
  * @returns {Object} - Merged app config, and it's path
  */
-const buildJoinedConfigs = (appConfig, TAP_PATH, TEMP_FOLDER_PATH) => {
+const buildJoinedConfigs = (kegConfig, TAP_PATH, TEMP_FOLDER_PATH) => {
   
   // Get the clientConfig, but we don't care if it's not valid
   const clientConfig = getAppConfig(TAP_PATH, false, false) || {}
 
   // Join the root config with the tap config
-  const joinedConfig = deepMerge(appConfig, clientConfig)
+  const joinedConfig = deepMerge(kegConfig, clientConfig)
 
   // Rebuild the temp folder path
   fs.mkdirSync(TEMP_FOLDER_PATH)
@@ -160,30 +133,30 @@ const buildJoinedConfigs = (appConfig, TAP_PATH, TEMP_FOLDER_PATH) => {
 /**
  * Looks up the taps app.json file and joins it with the default app.json
  * <br> Writes the joined config to disk inside a temp folder
- * @param {string} appRoot - Root directory of the mobile keg
- * @param {Object} appConfig - default app.json config
+ * @param {string} kegRoot - Root directory of the mobile keg
+ * @param {Object} kegConfig - default app.json config
  * @param {string} TAP_PATH - path to the tap folder
  * @param {boolean} HAS_TAP - if an active tap is set
  *
  * @returns {Object} - Merged app config, and it's path
  */
-const setupTapConfig = (appRoot, appConfig, TAP_PATH, HAS_TAP) => {
+const setupTapConfig = (kegRoot, kegConfig, tapConfig, TAP_PATH, HAS_TAP) => {
 
   // Data to load tap from
-  let tapData = { APP_CONFIG: appConfig, APP_CONFIG_PATH: configKeys.TAP_RESOLVER_LOC }
+  let tapData = { APP_CONFIG: kegConfig, APP_CONFIG_PATH: configKeys.TAP_RESOLVER_LOC }
 
   // If no tap just return the default tapData
   if(!HAS_TAP) return tapData
 
   // Get the location where temp tap configs should be stored
-  const TEMP_FOLDER_PATH = getTempFolderPath(appConfig, TAP_PATH)
+  const TEMP_FOLDER_PATH = getTempFolderPath(kegConfig, tapConfig, TAP_PATH)
 
   // Clean up any past client configs
   cleanupOldTempConfig(TEMP_FOLDER_PATH)
 
   try {
     // Join the root config with the tap config
-    tapData = buildJoinedConfigs(appConfig, TAP_PATH, TEMP_FOLDER_PATH)
+    tapData = buildJoinedConfigs(kegConfig, TAP_PATH, TEMP_FOLDER_PATH)
   }
   catch (e) {
     // If there's an error, just show the message, and will return the default tapData
@@ -196,34 +169,33 @@ const setupTapConfig = (appRoot, appConfig, TAP_PATH, HAS_TAP) => {
 /**
  * Sets up a the taps folder based on the app.json config
  * <br> Builds the paths for the current TAP based on ENV or app.json config
- * @param {string} appRoot - Root directory of the mobile keg
+ * @param {string} kegRoot - Root directory of the mobile keg
  * @param {string} tapName - name of the active tap
  *
  * @returns {Object} - Build constants and paths data for the active tap
  */
-module.exports = (appRoot, appConfig, tapName) => {
+module.exports = (kegRoot, kegConfig, tapPath, tapConfig) => {
 
   // Ensure the required app data exists
-  validateApp(appRoot, appConfig)
+  validateApp(kegRoot, kegConfig)
 
   // Set the default tap path
-  const BASE_PATH = getBaseTapPath(appRoot, appConfig)
+  const BASE_PATH = getBaseTapPath(kegRoot, kegConfig, tapPath, tapConfig)
 
   // Get the name of the active tap
-  const TAP_NAME = getActiveTapName(appConfig, tapName)
+  const TAP_NAME = getActiveTapName(kegConfig, tapConfig.name)
 
-  // Flag set if the active tap is different from the default root tap
-  const HAS_TAP = Boolean(TAP_NAME !== appConfig.name)
+  // Flag set if the active tap is different from the default keg
+  const HAS_TAP = Boolean(TAP_NAME !== kegConfig.name)
 
   // Set the tap path if an active tap is set
-  const TAP_PATH = HAS_TAP
-    ? getTapPath(appRoot, appConfig, TAP_NAME)
-    : BASE_PATH
+  const TAP_PATH = HAS_TAP ? tapPath : BASE_PATH
 
-  // Get the path to the app config ( either the appConfig or joined temp config )
+  // Get the path to the app config ( either the kegConfig or joined temp config )
   const { APP_CONFIG, APP_CONFIG_PATH } = setupTapConfig(
-    appRoot,
-    appConfig,
+    kegRoot,
+    kegConfig,
+    tapConfig,
     TAP_PATH,
     HAS_TAP
   )

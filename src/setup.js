@@ -11,15 +11,15 @@ setLogs(process.env.LOG, `log`, `[ Tap Resolver ]`)
 
 /**
  * Setups up the project to load the tap
- * @param {string} appRoot - Path to the root of the project
- * @param {Object} appConfig - app.json config file
+ * @param {string} kegPath - Path to the keg root
+ * @param {Object} kegConfig - keg app.json config file
  * @param {function} contentResolver - Function to help resolve file paths
  *
  * @return {Object} - Alias map to load files
  */
-module.exports = (appRoot, appConfig, contentResolver, tapName) => {
-  appRoot = appRoot || APP_ROOT
-  appConfig = appConfig || getAppConfig(appRoot)
+module.exports = (kegPath, kegConfig, contentResolver, tapPath, tapConfig) => {
+  kegPath = kegPath || APP_ROOT
+  kegConfig = kegConfig || getAppConfig(kegPath)
   
   const {
     ALIASES,
@@ -30,7 +30,7 @@ module.exports = (appRoot, appConfig, contentResolver, tapName) => {
     DYNAMIC_CONTENT,
     EXTENSIONS,
     HAS_TAP
-  } = buildConstants(appRoot, appConfig, tapName)
+  } = buildConstants(kegPath, kegConfig, tapPath, tapConfig)
 
   const aliasesBuilder = buildAliases(
     APP_CONFIG,

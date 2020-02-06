@@ -3,29 +3,7 @@ const appRootPath = require('app-root-path').path
 const runSetup = require('./src/setup')
 const getAppConfig = require('./src/getAppConfig')
 const { get, isObj, isStr } = require('jsutils')
-const { PLATFORM, NODE_ENV, TAP } = process.env
-
-/**
- * Try to get the name of the current tap
- * @param {string} name - name of the current tap
- *
- * @returns {string} - name of the current tap
- */
-const getTapName = name => {
-
-  name = name || TAP
-
-  // If we already have a name, lowercase it, and return it
-  if(name && isStr(name)) return name
-
-  // Try to get the tapConfig, but don't validate it
-  const tapConfig = getAppConfig(appRootPath, false, false)
-  // Check for the name
-  const tapName = get(tapConfig, ['name'])
-
-  // If there's a name, lowercase it, and return it
-  return tapName && tapName
-}
+const { PLATFORM, NODE_ENV } = process.env
 
 /**
  * Gets the platform data based on the PLATFORM ENV
@@ -46,15 +24,15 @@ const getPlatformData = (conf, isWeb) => {
 }
 /**
  * Loads a resolver file from the app config if defined, or uses the default
- * @param {Object} rootConfig - default app.json config
+ * @param {Object} kegConfig - default app.json config
  * @param {string} type - Type of resolver file to load ( contentResolver || webResolver )
  *
  * @returns {function} - Loaded resolver file
  */
-const getResolverFile = (rootPath, rootConfig, type) => {
+const getResolverFile = (kegPath, kegConfig, type) => {
   try {
-    const resolverPath = get(rootConfig, [ 'tapResolver', 'paths', type ])
-    const resolver = resolverPath && path.join(rootPath, resolverPath)
+    const resolverPath = get(kegConfig, [ 'tapResolver', 'paths', type ])
+    const resolver = resolverPath && path.join(kegPath, resolverPath)
     if (resolver) console.log(`Using custom resolver for ${type}`)
 
     return resolver
@@ -69,26 +47,32 @@ const getResolverFile = (rootPath, rootConfig, type) => {
     return require(`./src/${type}`)
   }
 }
+
 /**
  * Sets up the babel config based on the PLATFORM ENV and the app config in app.json
  *
  * @returns {Object} - built babel config
  */
-const babelSetup = (appPath, tapName) => {
-
-  const rootPath = appPath || appRootPath
+const babelSetup = (kegPath, tapPath, tapConfig) => {
 
   // Get the config for the App
-  const rootConfig = getAppConfig(rootPath)
+  const kegConfig = getAppConfig(kegPath)
 
   const isWeb = PLATFORM === 'web'
-  const platformConfAliases = getPlatformData(get(rootConfig, [ 'tapResolver', 'aliases' ]), isWeb)
-  const babelConf = getPlatformData(get(rootConfig, [ 'tapResolver', 'babel' ]), isWeb)
-  const contentResolver = getResolverFile(rootPath, rootConfig, 'contentResolver')
-  const webResolver = getResolverFile(rootPath, rootConfig, 'webResolver')
+  const platformConfAliases = getPlatformData(get(kegConfig, [ 'tapResolver', 'aliases' ]), isWeb)
+  const babelConf = getPlatformData(get(kegConfig, [ 'tapResolver', 'babel' ]), isWeb)
+  const contentResolver = getResolverFile(kegPath, kegConfig, 'contentResolver')
+  const webResolver = getResolverFile(kegPath, kegConfig, 'webResolver')
 
   // Run the setup to get tap extensions, and alias helper
-  const { buildAliases, EXTENSIONS } = runSetup(rootPath, rootConfig, contentResolver, getTapName(tapName))
+  const { buildAliases, EXTENSIONS } = runSetup(
+    kegPath,
+    kegConfig,
+    contentResolver,
+    tapPath,
+    tapConfig
+  )
+
   // Set the presets and plugins based on the platform type
   const presets = [ ...babelConf.presets ]
   const plugins = [ ...babelConf.plugins ]
@@ -96,8 +80,8 @@ const babelSetup = (appPath, tapName) => {
   // Build the module-resolver, and add the alias based on platform type
   plugins.push([
     'module-resolver', {
-      root: [ rootPath ],
-      cwd: rootPath,
+      root: [ kegPath ],
+      cwd: kegPath,
       extensions: EXTENSIONS,
       // Aliases work differently in webpack, so add the webResolver method helper for alias mapping
       resolvePath: isWeb && webResolver || undefined,
