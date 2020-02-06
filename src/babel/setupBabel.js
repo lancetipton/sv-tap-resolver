@@ -14,7 +14,7 @@ const { checkTapKegPath } = require('../helpers')
  * @returns {Object} - Platform specific settings for the passed in key
  */
 const getPlatformData = (options, key) => {
-  const data = get(options, [ 'config', 'tapResolver', key ])
+  const data = get(options, [ 'config', 'keg', 'tapResolver', key ])
 
   return !isObj(data)
     ? {}
@@ -39,7 +39,7 @@ const getResolverFile = (options, type) => {
   try {
 
     // Get the defined resolver path
-    const resolverPath = get(options, [ 'config', 'tapResolver', 'paths', type ])
+    const resolverPath = get(options, [ 'config', 'keg', 'tapResolver', 'paths', type ])
     
     // Ensure the path exists
     const resolver = resolverPath && checkTapKegPath(
@@ -65,7 +65,6 @@ const getResolverFile = (options, type) => {
 
   }
 }
-
 
 module.exports = {
   getPlatformData,

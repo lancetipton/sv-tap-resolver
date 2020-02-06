@@ -50,9 +50,11 @@ describe('Build Assets', () => {
     isDirectory = false
     const confCopy = {
       ...appConfig,
-      tapResolver: {
-        ...appConfig.tapResolver,
-        paths: { ...appConfig.tapResolver.paths, tapAssets: undefined }
+      keg: {
+        tapResolver: {
+          ...appConfig.keg.tapResolver,
+          paths: { ...appConfig.keg.tapResolver.paths, tapAssets: undefined }
+        }
       }
     }
     const assetsPath = buildAssets(confCopy, basePath, tapPath)

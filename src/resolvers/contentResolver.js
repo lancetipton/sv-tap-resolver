@@ -49,9 +49,9 @@ module.exports = (appConfig, aliasMap, content, type) => {
   // Ensure the required app data exists
   validateApp('_', appConfig)
 
-  const nameSpace = get(appConfig, [ 'tapResolver', 'aliases', 'nameSpace' ], '')
+  const nameSpace = get(appConfig, [ 'keg', 'tapResolver', 'aliases', 'nameSpace' ], '')
   const tapName = get(appConfig, [ 'name' ], '').toLowerCase().replace(/ /g, '_')
-  const folderRootFile = get(appConfig, [ 'tapResolver', 'paths', 'folderRootFile' ], 'index')
+  const folderRootFile = get(appConfig, [ 'keg', 'tapResolver', 'paths', 'folderRootFile' ], 'index')
 
   if(!TAP_PATH_CACHE[type]){
     // Check if a tapSrc exists

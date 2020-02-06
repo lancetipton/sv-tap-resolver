@@ -3,7 +3,7 @@ const path = require('path')
 
 // Helpers to allow calling the setup function in a test env
 const aliasMap = { 
-  ...appJson.tapResolver.aliases,
+  ...appJson.keg.tapResolver.aliases,
   ['TestTap']: '/preceding/tap/path'
 }
 const contentType = "components/assets"

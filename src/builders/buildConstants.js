@@ -14,7 +14,7 @@ const freezeObj = Object.freeze
  * @returns {Object} - new addTo object with it's keys updated
  */
 const addNameSpace = (appConfig, addTo) => {
-  const nameSpace = get(appConfig, [ 'tapResolver', 'aliases', 'nameSpace' ], '')
+  const nameSpace = get(appConfig, [ 'keg', 'tapResolver', 'aliases', 'nameSpace' ], '')
   if(!nameSpace || !isObj(addTo)) return addTo
   
   return reduceObj(addTo, (key, value, updated) => {
@@ -35,7 +35,7 @@ const addNameSpace = (appConfig, addTo) => {
   return freezeObj(
     cloneArr(
       // Try to pull the extensions from the config
-      get(appConfig, [ 'tapResolver', 'extensions', 'resolve' ],
+      get(appConfig, [ 'keg', 'tapResolver', 'extensions', 'resolve' ],
       // Otherwise set the default extensions
       get(tapConstants, [ 'extensions', 'resolve' ], [])
     ))
@@ -53,7 +53,7 @@ const addNameSpace = (appConfig, addTo) => {
  const buildBaseContent = (appConfig={}) => {
   return freezeObj(
     addNameSpace(appConfig, {
-      ...get(appConfig, [ 'tapResolver', 'aliases', 'base'], {})
+      ...get(appConfig, [ 'keg', 'tapResolver', 'aliases', 'base'], {})
     })
   )
  }
@@ -70,7 +70,7 @@ const buildDynamicContent = (appConfig={}) => {
   // Build the dynamic alias paths
   return freezeObj(
     addNameSpace(appConfig, {
-      ...get(appConfig, [ 'tapResolver', 'aliases', 'dynamic'], {}),
+      ...get(appConfig, [ 'keg', 'tapResolver', 'aliases', 'dynamic'], {}),
     })
   )
 }
@@ -97,7 +97,7 @@ const buildDynamicContent = (appConfig={}) => {
       TapSrc: paths.tapSrc,
       Config: paths.config,
       ...reduceObj(
-        get(appConfig, [ 'tapResolver', 'aliases', 'root'], {}),
+        get(appConfig, [ 'keg', 'tapResolver', 'aliases', 'root'], {}),
         (key, value, addAliases) => {
           addAliases[key] = path.join(kegPath, value)
           return addAliases

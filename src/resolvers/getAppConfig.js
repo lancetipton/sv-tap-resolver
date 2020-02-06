@@ -1,4 +1,3 @@
-const path = require('path')
 const { isObj, isEmpty, isStr, get } = require('jsutils')
 const { requireFile } = require('../helpers')
 const tapConstants = require('../tap/tapConstants')
@@ -33,7 +32,7 @@ const getAppConfig = (appRoot, validate=true) => (
     // If it does return it, otherwise return foundConfig
     return !validate
       ? config
-      : config.tapResolver
+      : get(config, [ 'keg', 'tapResolver' ])
         ? config
         : foundConfig
 
@@ -63,11 +62,11 @@ module.exports = (appRoot, validateObj=true, validatePaths=true) => {
   
   if(!validatePaths) return appConfig
   
-  const paths = get(appConfig, [ 'tapResolver', 'paths' ])
+  const paths = get(appConfig, [ 'keg', 'tapResolver', 'paths' ])
 
   if(!isObj(paths))
     throw new Error(
-      `App config does NOT define 'tapResolver.paths'. The path key is required, and must be an object!`
+      `App config does NOT define 'keg.tapResolver.paths'. The path key is required, and must be an object!`
     )
 
   Array
@@ -75,7 +74,7 @@ module.exports = (appRoot, validateObj=true, validatePaths=true) => {
     .map(path => {
       if(!isStr(paths[path]) && paths[path] !== false)
         throw new Error(
-          `Your app config 'tapResolver.paths' must contain a ${path} key as a string!`
+          `Your app config 'keg.tapResolver.paths' must contain a ${path} key as a string!`
         )
     })
 

@@ -1,9 +1,9 @@
-const appJson = require('./app.json')
+const appJson = require('../../__tests__/app.json')
 const { FS } = require('../../mocks')
 
 // Helpers to allow calling the setup function in a test env
 const aliasMap = {
-  ...appJson.tapResolver.aliases,
+  ...appJson.keg.tapResolver.aliases,
   TestTap: '/preceding/tap/path'
 }
 const contentType = "components/assets"

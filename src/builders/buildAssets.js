@@ -44,7 +44,7 @@ const getAssetsPath = (appConf, BASE_PATH, TAP_PATH) => {
   ensureDirSync(defAssetsPath)
 
   // Get the tap assets defined path from the app config
-  const tapAssets = get(appConf, [ 'tapResolver', 'paths', 'tapAssets' ])
+  const tapAssets = get(appConf, [ 'keg', 'tapResolver', 'paths', 'tapAssets' ])
 
   // Build the path relative to the tap
   const checkTapAssetPath = isStr(tapAssets) && path.join(TAP_PATH, tapAssets)
@@ -72,7 +72,7 @@ module.exports = (appConf, BASE_PATH, TAP_PATH) => {
   const assetNames = []
   let properties = assetFileNames(
     tapAssetPath,
-    get(appConf, [ 'tapResolver', 'extensions', 'assets' ], [])
+    get(appConf, [ 'keg', 'tapResolver', 'extensions', 'assets' ], [])
   )
     .map(name => {
       // Get the asset name, and add it to the assetNames array

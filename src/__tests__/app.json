@@ -1,31 +1,33 @@
 {
   "name": "tapResolver",
   "displayName": "Tap Resolver",
-  "tapResolver": {
-    "paths": {
-      "temp": ".temp",
-      "kegSrc": "base",
-      "tapSrc": "base",
-      "tapAssets": "assets"
-    },
-    "extensions": [],
-    "aliases": {
-      "nameSpace": "Test",
-      "root": {},
-      "base": {},
-      "dynamic": {},
-      "web": {},
-      "native": {}
-    },
-    "babel": {
-      "web": {
-        "presets": [],
-        "plugins": []
+  "keg": {
+    "tapResolver": {
+      "paths": {
+        "temp": ".temp",
+        "kegSrc": "base",
+        "tapSrc": "base",
+        "tapAssets": "assets"
       },
-      "native": {
-        "presets": [],
-        "plugins": []
-      }
-    } 
+      "extensions": [],
+      "aliases": {
+        "nameSpace": "Test",
+        "root": {},
+        "base": {},
+        "dynamic": {},
+        "web": {},
+        "native": {}
+      },
+      "babel": {
+        "web": {
+          "presets": [],
+          "plugins": []
+        },
+        "native": {
+          "presets": [],
+          "plugins": []
+        }
+      } 
+    }
   }
 }

@@ -23,7 +23,7 @@ ensureDirSync(TEMP_DEF_FOLDER)
 const getBaseTapPath = ({ config, tapPath, kegPath }) => {
 
   // Get the base tap path
-  const baseLoc = get(config, [ 'tapResolver', 'paths', 'kegSrc' ])
+  const baseLoc = get(config, [ 'keg', 'tapResolver', 'paths', 'kegSrc' ])
 
   // Find the full path
   const basePath = checkTapKegPath(tapPath, kegPath, baseLoc)
@@ -57,7 +57,7 @@ const getActiveTapName = config => {
  * @returns {string} - tap source directory
  */
 const getTapSrc = (options, HAS_TAP) => {
-  const tapSrc = HAS_TAP && get(options, [ 'config', 'tapResolver', 'paths', 'tapSrc' ], '')
+  const tapSrc = HAS_TAP && get(options, [ 'config', 'keg', 'tapResolver', 'paths', 'tapSrc' ], '')
   return tapSrc && path.join(options.tapPath, tapSrc) || options.tapPath
 }
 
@@ -94,7 +94,7 @@ const cleanupOldTempConfig = TEMP_FOLDER_PATH => {
 const getTempFolderPath = (options, TAP_PATH) => {
 
   // Check the app config for a temp folder path
-  const tempLocation = get(options, [ 'config', 'tapResolver', 'paths', 'temp' ])
+  const tempLocation = get(options, [ 'config', 'keg', 'tapResolver', 'paths', 'temp' ])
 
   // Check and built the relative path
   const configTemp = checkTapKegPath(TAP_PATH, options.kegPath, tempLocation)
