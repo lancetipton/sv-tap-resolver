@@ -7,6 +7,8 @@ const { LOG } = process.env
 // File path cache, holds the path to a found file, so it doesn't have to look it up again
 const FULL_PATH_CACHE = {}
 
+// Tap path cache, holds built alias paths for a tap
+const TAP_PATH_CACHE = {}
 /**
  * Clears out the path cache when switching to a new tap
  */
@@ -19,13 +21,19 @@ const resetFullPathCache = () => {
 
 /**
  * Checks if the path is a directory, and if so adds index to it
- * @param {string} fullPath - path to be check for a directory
+ * @param {string} aliasPath - path to the alias type
+ * @param {string} toLoad - path to file or folder to be loaded
+ * @param {string} folderRootFile - Name of file to load when toLoad is a directory
  *
  * @returns {string} - updated file path
  */
-const checkAddIndex = (fullPath) => {
+const checkAddIndex = (aliasPath, toLoad, folderRootFile) => {
+  // Build the path based on the tap alias
+  // Example: root_dir/taps/:tap_name/:type/:file_name
+  // - w/o extension
+  const fullPath = path.join(aliasPath, toLoad)
   return isDirectory(fullPath, true)
-    ? path.join(fullPath, 'index')
+    ? path.join(fullPath, folderRootFile)
     : fullPath
 }
 
@@ -37,48 +45,60 @@ const checkAddIndex = (fullPath) => {
  * @return { string } - path to file
  */
 module.exports = (appConfig, aliasMap, content, type) => {
+
   // Ensure the required app data exists
   validateApp('_', appConfig)
-  
+
   const nameSpace = get(appConfig, [ 'tapResolver', 'aliases', 'nameSpace' ], '')
+  const tapName = get(appConfig, [ 'name' ], '').toLowerCase().replace(/ /g, '_')
+  const folderRootFile = get(appConfig, [ 'tapResolver', 'paths', 'folderRootFile' ], 'index')
+
+  if(!TAP_PATH_CACHE[type]){
+    // Check if a tapSrc exists
+    const typePath = path.join(aliasMap[ `${nameSpace}TapSrc` ], type)
+    // If it does, ensure its a directory
+    // Otherwise use the default Tap path
+    TAP_PATH_CACHE[type] = typePath && isDirectory(typePath, true)
+        ? typePath
+        : path.join(aliasMap[ `${nameSpace}Tap` ], type)
+  }
   
   return match => {
 
-    // Check if 'index' should be added to the file path
-    // This allows loading the index.js of a folder
-    const fullPath = checkAddIndex(
-      // Build the path based on the tap alias
-      // Example: root_dir/taps/:tap_name/:type/:file_name
-      // - w/o extension
-      path.join(aliasMap[ `${nameSpace}Tap` ], type, match[1])
-    )
-
     // Check if the file has been loaded already
     // If it has, just return the cached path
-    if (FULL_PATH_CACHE[fullPath]) return FULL_PATH_CACHE[fullPath]
+    const cacheKey = match.join(`-${tapName}-`)
+    if (FULL_PATH_CACHE[cacheKey]) {
+      LOG && logData(`Loading cached file from ${FULL_PATH_CACHE[cacheKey]}`)
+      return FULL_PATH_CACHE[cacheKey]
+    }
+
+    // Check if path is a folder, and if folderRootFile should be added to the file path
+    // This allows loading the folderRootFile ( index.js ) of a folder, defaults to index.js
+    const fullPath = checkAddIndex(TAP_PATH_CACHE[type], match[1], folderRootFile)
 
     // Check if the file exists without any added extensions
-    //  Example: root_dir/taps/:tap_name/assets/platform.sqlite
+    // Example: tap_dir/assets/platform.sqlite
     let validPath = fs.existsSync(fullPath)
 
     // Loop the allowed extensions and check if any of the paths + extensions exist at the tap path
     validPath = validPath ||
       content.extensions
         .reduce((hasExt, ext) => {
-          // Example: root_dir/taps/:tap_name/:type/:file_name.js
+          // Example: tap_dir/:type/:file_name.js
           // - with extension
           return !hasExt && fs.existsSync(`${fullPath}${ext}`) ? true : hasExt
         }, false)
 
     // If there is a valid path, use it
     // Otherwise use the default base path
-    // Base path - root_dir/core/base/:type/:file_name.js
-    FULL_PATH_CACHE[fullPath] = validPath
+    // Base path - keg_dir/core/base/:type/:file_name.js
+    FULL_PATH_CACHE[cacheKey] = validPath
       ? fullPath
       : path.join(content.basePath, type, match[1])
 
-    LOG && logData(`Loading file from ${FULL_PATH_CACHE[fullPath]}`)
+    LOG && logData(`Loading file from ${FULL_PATH_CACHE[cacheKey]}`)
 
-    return FULL_PATH_CACHE[fullPath]
+    return FULL_PATH_CACHE[cacheKey]
   }
 }

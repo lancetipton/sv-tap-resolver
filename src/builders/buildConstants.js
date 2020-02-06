@@ -94,6 +94,7 @@ const buildDynamicContent = (appConfig={}) => {
       Assets: paths.assets,
       Base: paths.base,
       Tap: paths.tap,
+      TapSrc: paths.tapSrc,
       Config: paths.config,
       ...reduceObj(
         get(appConfig, [ 'tapResolver', 'aliases', 'root'], {}),
@@ -129,6 +130,7 @@ module.exports = options => {
     BASE_PATH,
     TAP_NAME,
     TAP_PATH,
+    TAP_SRC,
     HAS_TAP,
   } = setupTap(options)
 
@@ -140,6 +142,7 @@ module.exports = options => {
     assets: ASSETS_PATH,
     base: BASE_PATH,
     tap: TAP_PATH,
+    tapSrc: TAP_SRC,
     config: APP_CONFIG_PATH
   }
 

@@ -47,6 +47,21 @@ const getActiveTapName = config => {
 }
 
 /**
+ * Get the tap source directory if it exists, otherwise use the tapPath
+ * @param {Object} options - Settings to built the babel config
+ * @param {Object} options.config - Joined Tap and Keg configs
+ * @param {string} options.tapPath - Path to the tap
+ * @param {string} options.kegPath - Path to the keg
+ * @param {boolean} HAS_TAP - if a tap exists for not
+ *
+ * @returns {string} - tap source directory
+ */
+const getTapSrc = (options, HAS_TAP) => {
+  const tapSrc = HAS_TAP && get(options, [ 'config', 'tapResolver', 'paths', 'tapSrc' ], '')
+  return tapSrc && path.join(options.tapPath, tapSrc) || options.tapPath
+}
+
+/**
  * Try's to remove the fold temp folder if it exists
  * @param {string} TEMP_FOLDER_PATH - Path to the config temp folder
  *
@@ -188,6 +203,9 @@ module.exports = options => {
   // Set the tap path if an active tap is set
   const TAP_PATH = HAS_TAP ? tapPath : BASE_PATH
 
+  // Set the tap source path
+  const TAP_SRC = getTapSrc(options, HAS_TAP)
+
   // Get the path to the app config ( either the config or joined temp config )
   const { APP_CONFIG, APP_CONFIG_PATH } = setupTapConfig(
     options,
@@ -206,6 +224,7 @@ module.exports = options => {
     BASE_PATH,
     TAP_NAME,
     TAP_PATH,
+    TAP_SRC,
     HAS_TAP
   }
 }
