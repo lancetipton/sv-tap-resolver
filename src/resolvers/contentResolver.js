@@ -29,7 +29,7 @@ const resetFullPathCache = () => {
  */
 const checkAddIndex = (aliasPath, toLoad, folderRootFile) => {
   // Build the path based on the tap alias
-  // Example: root_dir/taps/:tap_name/:type/:file_name
+  // Example: tap_dir/src/:type/:folderRootFile
   // - w/o extension
   const fullPath = path.join(aliasPath, toLoad)
   return isDirectory(fullPath, true)

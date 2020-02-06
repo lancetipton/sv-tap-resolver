@@ -1,9 +1,5 @@
 const { FS } = require('../../mocks')
 
-jest.setMock('fs', FS)
-
-const testTapName = "test"
-const testAppRoot = ""
 const buildConstants = require('../buildConstants')
 
 describe('Build Constants', () => {
@@ -12,13 +8,11 @@ describe('Build Constants', () => {
 
   })
   
-  it('should fail if appRoot is null', () => {
-    expect(() => setupTap(null, {}, testTapName))
-      .toThrow(Error)
+  it('', () => {
+    
   })
 
-  it('should fail if appConfig is null', () => {
-    expect(() => setupTap(" ", null, testTapName))
-      .toThrow(Error)
+  it('', () => {
+    
   })
 })
