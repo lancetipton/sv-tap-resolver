@@ -1,12 +1,13 @@
-const { deepFreeze } = require('jsutils')
 const FS = require('./fs')
 const Rimraf = require('./rimraf')
 const paths = require('./paths')
-const appJson = require('./app.json')
+const configs = require('./configs')
+const options = { config: configs.config, kegPath: paths.kegPath, tapPath: paths.tapPath }
 
 module.exports = {
   FS,
   Rimraf,
   ...paths,
-  appConfig: Object.freeze(appJson),
+  ...configs,
+  options
 }

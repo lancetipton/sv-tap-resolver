@@ -1,6 +1,6 @@
 const path = require('path')
 const fs = require('fs')
-const { deepMerge, cloneArr, get, isObj, reduceObj, logData } = require('jsutils')
+const { cloneArr, get, isObj, reduceObj } = require('jsutils')
 const buildAssets = require('./buildAssets')
 const { validateApp } = require('../helpers')
 const { setupTap, tapConstants } = require('../tap')

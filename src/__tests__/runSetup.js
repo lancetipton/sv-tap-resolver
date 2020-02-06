@@ -1,15 +1,18 @@
-const { appConfig, appRoot } = require('../mocks')
+const { options } = require('../mocks')
+const { isArr, isFunc } = require('jsutils')
 
 // Helpers to allow calling the setup function in a test env
-const buildAliases = jest.fn(() => { return {} })
-const buildConstants = jest.fn(() => { return {} })
-const getAppConfig = jest.fn(() => { return appConfig })
+const buildAliases = jest.fn(() => { return jest.fn() })
+const buildConstants = jest.fn(() => { return { EXTENSIONS: [] } })
+const validateApp = jest.fn(() => { return true })
 const resolver = () => ""
+const defResolver = () => ""
 
 // Mock the called functions for testing
 jest.setMock('../builders/buildAliases', buildAliases)
 jest.setMock('../builders/buildConstants', buildConstants)
-jest.setMock('../resolvers/getAppConfig', getAppConfig)
+jest.setMock('../helpers', { validateApp })
+jest.setMock('../resolvers/contentResolver', defResolver)
 
 // Module to test
 const runSetup = require('../runSetup')
@@ -17,39 +20,57 @@ const runSetup = require('../runSetup')
 describe('runSetup', () => {
   
   beforeEach(() => {
-    getAppConfig.mockClear()
+    validateApp.mockClear()
     buildConstants.mockClear()
     buildAliases.mockClear()
   })
 
-  describe('params', () => {
+  it('should call the validateApp method', () => {
 
-    it('should call the getAppConfig when no config is passed in', () => {
-      runSetup(appRoot, null, resolver, null)
-      expect(getAppConfig).toHaveBeenCalled()
-    })
+    runSetup(options, resolver)
 
-    it('should NOT call the getAppConfig when a config is passed in', () => {
-      runSetup(appRoot, appConfig, resolver, null)
-      expect(getAppConfig).not.toHaveBeenCalled()
-    })
+    expect(validateApp).toHaveBeenCalledWith(options.kegPath, options.config)
 
   })
 
-  describe('Internal function calls', () => {
+  it('should call the buildConstants method', () => {
 
-    it('should call the buildConstants method', () => {
-      const tapName = null
-      runSetup(appRoot, appConfig, resolver, tapName)
+    runSetup(options, resolver)
 
-      expect(buildConstants).toHaveBeenCalledWith(appRoot, appConfig, tapName)
-    })
+    expect(buildConstants).toHaveBeenCalledWith(options)
 
-    it('should call the buildAliases method', () => {
-      runSetup(appRoot, appConfig, resolver, null)
+  })
 
-      expect(buildAliases).toHaveBeenCalled()
-    })
+  it('should call the buildAliases method', () => {
+
+    runSetup(options, resolver)
+
+    expect(buildAliases).toHaveBeenCalled()
+
+  })
+
+  it('should use the default content resolver, when one is not passed in', () => {
+
+    runSetup(options)
+
+    expect(buildAliases.mock.calls[0][1]).toBe(defResolver)
+
+  })
+
+  it('should use the passed in content resolver, when one is passed in', () => {
+
+    runSetup(options, resolver)
+
+    expect(buildAliases.mock.calls[0][1]).toBe(resolver)
+
+  })
+
+  it('should return extensions and buildAlias function', () => {
+
+    const { EXTENSIONS, buildAliases } = runSetup(options, resolver)
+
+    expect(isArr(EXTENSIONS)).toBe(true)
+    expect(isFunc(buildAliases)).toBe(true)
 
   })
 

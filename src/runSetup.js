@@ -1,10 +1,7 @@
-const fs = require('fs')
-const path = require('path')
-const APP_ROOT = require('app-root-path')
-const { logData, setLogs, get } = require('jsutils')
+const { setLogs } = require('jsutils')
 const buildAliases = require('./builders/buildAliases')
 const buildConstants = require('./builders/buildConstants')
-const getAppConfig = require('./resolvers/getAppConfig')
+const { validateApp } =  require('./helpers')
 const defContentResolver = require('./resolvers/contentResolver')
 
 setLogs(process.env.LOG, `log`, `[ Tap Resolver ]`)
@@ -21,12 +18,16 @@ setLogs(process.env.LOG, `log`, `[ Tap Resolver ]`)
  */
 module.exports = (options, contentResolver) => {
 
+  // Ensure the required app data exists
+  validateApp(options.kegPath, options.config)
+
+  // Ensure we have a contentResolver
   contentResolver = contentResolver || defContentResolver
 
+  // Build out the Tap / Keg constant
   const {
     ALIASES,
     APP_CONFIG,
-    APP_CONFIG_PATH,
     BASE_CONTENT,
     BASE_PATH,
     DYNAMIC_CONTENT,
@@ -34,6 +35,7 @@ module.exports = (options, contentResolver) => {
     HAS_TAP
   } = buildConstants(options)
 
+  // Build out the Tap / Keg aliases
   const aliasesBuilder = buildAliases(
     APP_CONFIG,
     contentResolver,
@@ -49,6 +51,8 @@ module.exports = (options, contentResolver) => {
 
   return {
     EXTENSIONS,
+    // aliasesBuilder is a function that returns a function
+    // Which allows us to build the aliases when the babel config get's built
     buildAliases: aliasesBuilder,
   }
 }
