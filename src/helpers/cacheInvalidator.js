@@ -1,5 +1,5 @@
 const path = require('path')
-const tapConstants = require('./tapConstants')
+const tapConstants = require('../tap/tapConstants')
 
 module.exports = () => {
   tapConstants.cacheFiles.map(file => {

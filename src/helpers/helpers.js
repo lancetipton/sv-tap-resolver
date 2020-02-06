@@ -46,9 +46,9 @@ const pathExists = check => {
  *
  * @return {boolean} - if passed in string exists on the file system
  */
-const pathExistsSync = check => {
+const pathExistsSync = checkPath => {
   try {
-    const stats = fs.statSync(check);
+    const stats = fs.statSync(checkPath)
     return true
   }
   catch(err) {
@@ -56,6 +56,34 @@ const pathExistsSync = check => {
   }
 }
 
+/**
+ * Builds a path, then check if it exists
+ * @param {string} basePath - Relative path location
+ * @param {string} checkPath - Path to check if it exists
+ *
+ * @returns {string|boolean} - Path if it exists || false
+ */
+const buildCheckPath = (basePath, checkPath) => {
+  if(!isStr(basePath) || !isStr(checkPath)) false
+  
+  const location = path.join(basePath, checkPath)
+
+  return pathExistsSync(location) && location
+}
+
+/**
+ * Checks if a path exists relative to the tap directory
+ * If it does, then it returns that path, Otherwise
+ * it checks if path exists relative to the keg directory and returns it
+ * @param {*} tapPath - Tap root directory
+ * @param {*} kegPath - Keg root directory
+ * @param {*} checkPath - Path to check if it exists
+ *
+ * @returns {string|boolean} - Path if it exists || false
+ */
+const checkTapKegPath = (tapPath, kegPath, checkPath) => {
+  return buildCheckPath(tapPath, checkPath) || buildCheckPath(kegPath, checkPath)
+}
 
 /**
  * Ensures a directory exists
@@ -74,8 +102,6 @@ const ensureDirSync = dirPath => {
     return false
   }
 }
-
-
 
 /**
  * Wraps require in a try catch to app doesn't throw when require is called inline
@@ -109,19 +135,22 @@ const requireFile = (folder, file, logError) => {
  *
  * @return {void}
  */
-const validateApp = (appRoot, appConfig) => {
-  if(!appRoot || !isStr(appRoot))
+const validateApp = (kegPath, config) => {
+  if(!kegPath || !isStr(kegPath))
     throw new Error(
-      `App root path is required as a valid string primitive. Instead ${appRoot} was received!`
+      `Tap Resolver requires a kegPath as a valid string. Instead ${kegPath} was received!`
     )
 
-  if(!appConfig || !isObj(appConfig))
+  if(!config || !isObj(config))
     throw new Error(
-      `App config is required as a valid object primitive. Instead ${appConfig} was received!`
+      `Tap Resolver requires a config as a valid object. Instead ${config} was received!`
     )
+
 }
 
+
 module.exports = {
+  checkTapKegPath,
   ensureDirSync,
   isDirectory,
   pathExists,

@@ -1,7 +1,7 @@
 const path = require('path')
 const { isObj, isEmpty, isStr, get } = require('jsutils')
-const { requireFile } = require('./helpers')
-const tapConstants = require('./tapConstants')
+const { requireFile } = require('../helpers')
+const tapConstants = require('../tap/tapConstants')
 
 const { configNames, configKeys }  = tapConstants
 
@@ -71,7 +71,7 @@ module.exports = (appRoot, validateObj=true, validatePaths=true) => {
     )
 
   Array
-    .from([ 'externalTaps', 'localTaps', 'baseTap' ])
+    .from([ 'kegSrc' ])
     .map(path => {
       if(!isStr(paths[path]) && paths[path] !== false)
         throw new Error(

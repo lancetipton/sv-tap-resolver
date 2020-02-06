@@ -24,14 +24,14 @@ module.exports = deepFreeze({
   * Files that should have their cache cleared when cacheInvalidator is called
   */
   cacheFiles: [
-    './buildAliases',
-    './buildAssets',
-    './buildConstants',
-    './getAppConfig',
-    './contentResolver',
-    './setup',
+    './builders/buildAliases',
+    './builders/buildAssets',
+    './builders/buildConstants',
+    './resolvers/getAppConfig',
+    './resolvers/contentResolver',
+    './resolvers/webResolver',
+    './runSetup',
     './setupTap',
-    './webResolver',
   ],
   
   /**

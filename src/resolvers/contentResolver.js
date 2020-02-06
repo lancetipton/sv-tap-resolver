@@ -1,7 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 const { logData, get } = require('jsutils')
-const { validateApp, isDirectory } = require('./helpers')
+const { validateApp, isDirectory } = require('../helpers')
 const { LOG } = process.env
 
 // File path cache, holds the path to a found file, so it doesn't have to look it up again

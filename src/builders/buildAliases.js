@@ -1,6 +1,6 @@
 const path = require('path')
 const { isFunc } = require('jsutils')
-const { validateApp } = require('./helpers')
+const { validateApp } = require('../helpers')
 /**
  * Adds dynamic content to the aliasMap of base content if a tap is set
  * @param {Object} aliasMap - object that holds all path alias

@@ -3,12 +3,10 @@
   "displayName": "Tap Resolver",
   "tapResolver": {
     "paths": {
-      "baseTap": "base",
-      "tapAssets": "assets",
-      "tapList": "./",
-      "tapListFile": "tapList.js",
-      "externalTaps": "node_modules/test-external-taps",
-      "localTaps": "taps"
+      "temp": ".temp",
+      "kegSrc": "base",
+      "tapSrc": "base",
+      "tapAssets": "assets"
     },
     "extensions": [],
     "aliases": {

@@ -50,20 +50,20 @@ describe('Setup Tap', () => {
   describe('Finding the correct base path', () => {
 
     it('should use the BASE_PATH set in the appConfig if it is a directory', () => {
-      validPathMatch = path.join(testAppRoot, get(appConfig, [ 'tapResolver', 'paths', 'baseTap' ]))
+      validPathMatch = path.join(testAppRoot, get(appConfig, [ 'tapResolver', 'paths', 'kegSrc' ]))
       const { BASE_PATH } = setupTap(testAppRoot, appConfig, testTapName)
 
       expect(BASE_PATH).toBe(validPathMatch)
     })
 
-    it('should build BASE_PATH from /taps and appConfig.name if baseTap is not in appConfig', () => {
+    it('should build BASE_PATH from /taps and appConfig.name if kegSrc is not in appConfig', () => {
       validPathMatch = path.join(testAppRoot, './taps', appConfig.name)
       const { BASE_PATH } = setupTap(testAppRoot, appConfig, testTapName)
 
       expect(BASE_PATH).toBe(validPathMatch)
     })
 
-    it('should build BASE_PATH from and appConfig.name if no baseTap or taps folders', () => {
+    it('should build BASE_PATH from and appConfig.name if no kegSrc or taps folders', () => {
       validPathMatch = path.join(testAppRoot, appConfig.name)
       const { BASE_PATH } = setupTap(testAppRoot, appConfig, testTapName)
 

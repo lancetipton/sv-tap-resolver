@@ -3,13 +3,10 @@
   "displayName": "Tap Resolver",
   "tapResolver": {
     "paths": {
-      "temp": "./temp",
-      "baseTap": "",
+      "temp": "./.temp",
+      "kegSrc": "",
+      "tapSrc": "",
       "tapAssets": "",
-      "tapList": "",
-      "tapListFile": "",
-      "externalTaps": "",
-      "localTaps": "",
       "contentResolver": "",
       "webResolver": ""
     },

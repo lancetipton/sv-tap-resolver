@@ -14,12 +14,12 @@ const resolver = () => ""
 
 // Mock the called functions for testing
 jest.setMock('fs', FS)
-jest.setMock('../buildAliases', buildAliases)
-jest.setMock('../buildConstants', buildConstants)
-jest.setMock('../getAppConfig', getAppConfig)
+jest.setMock('../builders/buildAliases', buildAliases)
+jest.setMock('../builders/buildConstants', buildConstants)
+jest.setMock('../resolvers/getAppConfig', getAppConfig)
 
 // Module to test
-const Setup = require('../setup')
+const Setup = require('../runSetup')
 
 describe('Setup', () => {
   

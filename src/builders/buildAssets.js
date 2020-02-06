@@ -1,8 +1,8 @@
 const fs = require('fs')
 const path = require('path')
 const { get, isStr } = require('jsutils')
-const { isDirectory, ensureDirSync } = require('./helpers')
-const tapConstants = require('./tapConstants')
+const { isDirectory, ensureDirSync } = require('../helpers')
+const tapConstants = require('../tap/tapConstants')
 
 /**
  * Gets all the asset files names from the passed in tapAssetPath

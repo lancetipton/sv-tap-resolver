@@ -2,10 +2,8 @@ const path = require('path')
 const fs = require('fs')
 const { deepMerge, cloneArr, get, isObj, reduceObj, logData } = require('jsutils')
 const buildAssets = require('./buildAssets')
-const setupTap = require('./setupTap')
-const { validateApp } = require('./helpers')
-const tapConstants = require('./tapConstants')
-
+const { validateApp } = require('../helpers')
+const { setupTap, tapConstants } = require('../tap')
 const freezeObj = Object.freeze
 
 /**
@@ -82,17 +80,17 @@ const buildDynamicContent = (appConfig={}) => {
   * Builds the default Alias to load app content
   * Can not be over-written
   * Paths that pull base folder only
-  * @param {string} appRoot - path to the root of the project
+  * @param {string} kegPath - path to the root of the project
   * @param {Object} [appConfig={}] - app.json config file
   * @param {Object} [paths={}] - object holds the paths to be set
   *
   * @returns {Object} - all paths that should be an alias
   */
- const buildAliases = (appRoot, appConfig={}, paths={}) => {
+ const buildAliases = (kegPath, appConfig={}, paths={}) => {
 
   return freezeObj(
     addNameSpace(appConfig, {
-      AppRoot: appRoot,
+      AppRoot: kegPath,
       Assets: paths.assets,
       Base: paths.base,
       Tap: paths.tap,
@@ -100,7 +98,7 @@ const buildDynamicContent = (appConfig={}) => {
       ...reduceObj(
         get(appConfig, [ 'tapResolver', 'aliases', 'root'], {}),
         (key, value, addAliases) => {
-          addAliases[key] = path.join(appRoot, value)
+          addAliases[key] = path.join(kegPath, value)
           return addAliases
         }, {})
     })
@@ -110,17 +108,19 @@ const buildDynamicContent = (appConfig={}) => {
 
 /**
  * Builds the constants which contains paths to the taps folder
- * @param {string} appRoot - Path to the root of the project
- * @param {Object} appConfig - app.json config file
- * @param {string} tapPath - path to the tap to use
- * @param {string} tapConfig - the tap.json for the current tap
+ * @param {Object} options - Settings to built the babel config
+ * @param {Object} options.config - Joined Tap and Keg configs
+ * @param {string} options.tapPath - Path to the tap
+ * @param {string} options.kegPath - Path to the keg
  *
  * @return {Object} - Alias map to load files
  */
-module.exports = (appRoot, appConfig, tapPath, tapConfig) => {
-  
+module.exports = options => {
+
+  const { config, kegPath } = options
+
   // Ensure the required app data exists
-  validateApp(appRoot, appConfig)
+  validateApp(kegPath, config)
 
   // Setup the tap, to get the correct path data
   const {
@@ -130,7 +130,7 @@ module.exports = (appRoot, appConfig, tapPath, tapConfig) => {
     TAP_NAME,
     TAP_PATH,
     HAS_TAP,
-  } = setupTap(appRoot, appConfig, tapPath, tapConfig)
+  } = setupTap(options)
 
   // Build the assets for the tap
   const ASSETS_PATH = buildAssets(APP_CONFIG, BASE_PATH, TAP_PATH)
@@ -152,7 +152,7 @@ module.exports = (appRoot, appConfig, tapPath, tapConfig) => {
     TAP_NAME,
     TAP_PATH,
     HAS_TAP,
-    ALIASES: buildAliases(appRoot, APP_CONFIG, aliasPaths),
+    ALIASES: buildAliases(kegPath, APP_CONFIG, aliasPaths),
     BASE_CONTENT: buildBaseContent(APP_CONFIG),
     DYNAMIC_CONTENT: buildDynamicContent(APP_CONFIG),
     EXTENSIONS: buildExtensions(APP_CONFIG),
