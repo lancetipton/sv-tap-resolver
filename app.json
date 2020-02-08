@@ -7,7 +7,7 @@
     "overrides": {},
     "tapResolver": {
       "paths": {
-        "temp": "./.temp",
+        "temp": "./temp",
         "kegSrc": "",
         "tapSrc": "",
         "tapAssets": "",

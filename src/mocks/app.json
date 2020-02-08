@@ -5,7 +5,7 @@
     "name": "SVKeg",
     "tapResolver": {
       "paths": {
-        "temp": ".temp",
+        "temp": "temp",
         "kegSrc": "src/mocks/base",
         "tapSrc": "src/mocks/taps/test",
         "tapAssets": "assets",

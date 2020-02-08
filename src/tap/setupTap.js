@@ -8,8 +8,7 @@ const tapConstants = require('./tapConstants')
 const { configKeys }  = tapConstants
 
 // Default location to store files
-const TEMP_DEF_FOLDER = path.join(__dirname, '..', './.temp')
-ensureDirSync(TEMP_DEF_FOLDER)
+const TEMP_DEF_FOLDER = './temp'
 
 /**
  * Gets the path to the app.json tap folder
@@ -92,15 +91,20 @@ const cleanupOldTempConfig = TEMP_FOLDER_PATH => {
  * @returns {string} - path to the temp folder
  */
 const getTempFolderPath = (options, TAP_PATH) => {
-
   // Check the app config for a temp folder path
-  const tempLocation = get(options, [ 'config', 'keg', 'tapResolver', 'paths', 'temp' ])
+  // Or use the default
+  const tempLocation = get(
+    options,
+    [ 'config', 'keg', 'tapResolver', 'paths', 'temp' ],
+    TEMP_DEF_FOLDER
+  )
+  // Build the path
+  const configTemp = path.join(TAP_PATH, tempLocation)
 
-  // Check and built the relative path
-  const configTemp = checkTapKegPath(TAP_PATH, options.kegPath, tempLocation)
+  // Ensure the directory exists
+  ensureDirSync(configTemp)
 
-  // If the path exists return it otherwise return the default
-  return configTemp || TEMP_DEF_FOLDER
+  return configTemp
 
 }
 
